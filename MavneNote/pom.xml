@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+<!--    Maven 核心概念:
+    ①POM ②约定的目录结构 ③坐标 ④依赖管理 ⑤仓库管理 ⑥生命周期 ⑦插件和目标 ⑧继承 ⑨聚合-->
+
+    <!--1.POM(Project Object Model):项目对象模型;将Java工程的相关信息封装为对象作为便于操作和管理的模型.-->
+
+    <!--Super POM:父类POM(所有的POM都继承它)-->
+
+    <!--创建父工程-->
+    <!--2.Maven 的坐标-->
+    <groupId>com.maven.note</groupId><!--[1]groupid：公司或组织的域名倒序+当前项目名称-->
+    <artifactId>MavneNote</artifactId><!--[2]artifactId：当前项目的模块名称-->
+    <version>1.0-SNAPSHOT</version><!--[3]version：当前模块的版本-->
+    <packaging>pom</packaging><!--打包方式处要设置为 pom-->
+
+    <!--注意：自己的Maven工程必须执行安装操作才会进入仓库。安装的命令是：mvn install-->
+
+    <!--    将多个工程拆分为模块后，需要手动逐个安装到仓库后依赖才能够生效。
+    修改源码后也需要逐个手动进行 clean 操作。
+    而使用了聚合之后就可以批量进行 Maven 工程的安装、清理工作-->
+
+    <!--本地仓库默认的位置是：~\.m2\repository-->
+
+    <modules>
+        <!-- 指定各个子工程 -->
+        <module>spring-boot</module>
+        <!--<module>SpringMVC</module>-->
+        <module>maven-boot</module>
+    </modules>
+
+    <!--设置阿里云镜像-->
+    <repositories>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.9</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring.webmvc.version>4.3.7.RELEASE</spring.webmvc.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.webmvc.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <!--A Build Lifecycle-->
+
+<!--    构建过程的几个主要环节
+    ①清理(clean)：删除以前的编译结果，为重新编译做好准备。
+    ②编译(compile)：将 Java 源程序编译为字节码文件。
+    ③测试(test)：针对项目中的关键点进行测试，确保项目在迭代开发过程中关键点的正确性。
+    ⑤打包(package)：将一个包含诸多文件的工程封装为一个压缩文件用于安装或部署。Java工程对应jar包，Web工程对应war包。
+    ⑥安装(install)：在 Maven 环境下特指将打包的结果——jar 包或 war 包安装到本地仓库中。
+    ⑦部署(deploy)：将打包的结果部署到远程仓库或将 war 包部署到服务器上运行。-->
+
+<!--    一个典型的Maven构建生命周期包含以下顺序的阶段:
+    prepare-resources (准备资源)
+    compile(编译)
+    package(打包)
+    install(安装)-->
+
+<!--    ●Maven 有三套相互独立的生命周期，分别是：
+    ①Clean Lifecycle 在进行真正的构建之前进行一些清理工作。
+    ②Default Lifecycle 构建的核心部分，编译，测试，打包，安装，部署等等。
+    ③Site Lifecycle 生成项目报告，站点，发布站点。-->
+
+<!--    它们是相互独立的，你可以仅仅调用 clean 来清理工作目录，仅仅调用site来生成站点。也可以
+    直接运行 mvn clean install site 运行所有这三套生命周期。
+    每套生命周期都由一组阶段(Phase)组成，平时在命令行输入的命令总会对应于一个特定的阶段。比
+    如，运行mvn clean,这个clean是Clean生命周期的一个阶段.有Clean生命周期,也有clean阶段。-->
+
+<!--    Clean Lifecycle
+    Clean 生命周期一共包含了三个阶段：
+    ①pre-clean 执行一些需要在 clean 之前完成的工作
+    ②clean 移除所有上一次构建生成的文件
+    ③post-clean 执行一些需要在 clean 之后立刻完成的工作-->
+
+<!--    Default Lifecycle
+    Default 生命周期是 Maven 生命周期中最重要的一个，绝大部分工作都发生在这个生命周期中。
+    常用的阶段:
+    validate
+    generate-sources
+    process-sources
+    generate-resources
+    process-resources 复制并处理资源文件，至目标目录，准备打包。
+    compile 编译项目的源代码。
+    process-classes
+    generate-test-sources
+    process-test-sources
+    generate-test-resources
+    process-test-resources 复制并处理资源文件，至目标测试目录。
+    test-compile 编译测试源代码。
+    process-test-classes
+    test 使用合适的单元测试框架运行测试。这些测试代码不会被打包或部署。
+    prepare-package
+    package 接受编译好的代码，打包成可发布的格式，如 JAR。
+    pre-integration-test
+    integration-test
+    post-integration-test
+    verify
+    install 将包安装至本地仓库，以让其它项目依赖。
+    deploy 将最终的包复制到远程的仓库，以让其它开发人员与项目共享或部署到服务器上运行。-->
+
+<!--    Site Lifecycle
+    ①pre-site 执行一些需要在生成站点文档之前完成的工作
+    ②site 生成项目的站点文档
+    ③post-site 执行一些需要在生成站点文档之后完成的工作，并且为部署做准备
+    ④site-deploy 将生成的站点文档部署到特定的服务器上
+
+    这里经常用到的是site阶段和site-deploy阶段,用以生成和发布Maven站点
+    的功能，Manager 比较喜欢，文档及统计数据自动生成，很好看。-->
+
+<!--    Lifecycle与自动化构建
+    运行任何一个阶段的时候,它前面的所有阶段都会被运行,例如我们运行mvn install的时候,代码会
+    被编译,测试,打包.这就是Maven为什么能够自动执行构建过程的各个环节的原因.此外,Maven的插
+    件机制是完全依赖Maven的生命周期的，因此理解生命周期至关重要.-->
+
+<!--    插件和目标
+    ●Maven的核心仅仅定义了抽象的生命周期，具体的任务都是交由插件完成的。
+    ●每个插件都能实现多个功能，每个功能就是一个插件目标。
+    ●Maven 的生命周期与插件目标相互绑定，以完成某个具体的构建任务。
+    例如：compile就是插件maven-compiler-plugin的一个目标；
+    pre-clean是插件maven-clean-plugin的一个目标。-->
+
+<!--    3.依赖:使用Maven最主要的就是使用它的依赖管理功能
+    当A的jar包用到了B的jar包中的某些类时，A就对B产生了依赖
+    依赖信息中除了目标jar包的坐标还有一个scope设置，这是依赖的范围。依赖的范
+    围有几个可选值，用得到的是：compile、test、provided
+
+    有效性总结:
+    compile test provided
+    主程序     √      ×      √
+    测试程序   √      √      √
+    参与部署   √      ×      ×-->
+</project>
